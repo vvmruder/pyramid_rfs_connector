@@ -17,6 +17,7 @@
 
 __author__ = 'Clemens Rudert'
 
+from pyramid_rfs_connector import CERT_PATH
 from python_webdav.connection import Connection, Client
 import os
 
@@ -37,8 +38,6 @@ class WebDavConnection():
     Das kann geaendert werden.
     ACHTUNG: Schreibrechte pruefen!
     """
-
-    CERT_PATH = "/etc/ssl/certs/ca-certificates.crt"
 
     def __init__(self, url, username='', password=''):
         self.__url__ = url
@@ -62,7 +61,7 @@ class WebDavConnection():
             'realm': '',
             'path': ''
         })
-        connection.httpcon.ca_certs = self.CERT_PATH
+        connection.httpcon.ca_certs = CERT_PATH
         return connection
 
     def download_file(self, src, dst):

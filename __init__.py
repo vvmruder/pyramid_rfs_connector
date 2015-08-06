@@ -20,6 +20,8 @@ __create_date__ = '06.08.15'
 
 from pyramid.config import Configurator
 
+CERT_PATH = "/etc/ssl/certs/ca-certificates.crt"
+
 
 def includeme(config):
     """
@@ -29,7 +31,16 @@ def includeme(config):
     :param config: The pyramid apps config object
     :type config: Configurator
     """
+
+    global CERT_PATH
+
     settings = config.get_settings()
+
+    # Set cert path
+    cert = settings.get('rfs_cert_path')
+    if cert is not None:
+        CERT_PATH = cert
+
     config.include('pyramid_mako')
     config.add_static_view('pyramid_rfs_connector', 'pyramid_rfs_connector:static',
         cache_max_age=int(settings["default_max_age"])
