@@ -44,11 +44,18 @@ class WebDavConnection():
         self.__url__ = url
         self.__username__ = username
         self.__password__ = password
-        self.webdavclient = Client()
+        
+    def __concat_url__(self, part1, part2):
+        if part1.endswith('/'):
+            part1 = part1[:-1]
+        if not part2.startswith('/'):
+            part2 = '/' + part2
+        return part1 + part2
 
-    def __create_connection__(self):
+    def __create_connection__(self, path):
+        url = self.__concat_url__(self.__url__, path)
         connection = Connection({
-            'host': self.__url__,
+            'host': url,
             'port': 443,
             'username': self.__username__,
             'password': self.__password__,
@@ -60,8 +67,11 @@ class WebDavConnection():
 
     def download_file(self, src, dst):
         try:
+            src_parts = src.split('/')
+            file = src_parts.pop()
+            path = '/'.join(src_parts) + '/'
             client = Client()
-            client.get_file(self.__create_connection__(), src, dst)
+            client.get_file(self.__create_connection__(path), file, dst)
             f = open(dst)
             file_data = f.read()
             if '404 Not Found' in file_data:
@@ -75,8 +85,11 @@ class WebDavConnection():
 
     def upload_file(self, src, dst):
         try:
+            dst_parts = dst.split('/')
+            file = dst_parts.pop()
+            path = '/'.join(dst_parts) + '/'
             client = Client()
-            client.send_file(self.__create_connection__(), dst, src)
+            client.send_file(self.__create_connection__(path), file, src)
         except Exception as e:
             print e
             pass
@@ -85,7 +98,10 @@ class WebDavConnection():
         try:
             f = open(src, 'rb')
             data = f.read()
-            self.__create_connection__().send_put(os.path.join(self.__url__, dst.encode('utf-8')), data)
+            self.__create_connection__('').send_put(
+                self.__concat_url__(self.__url__, dst).encode('utf-8'),
+                data
+            )
         except Exception as e:
             print e
             pass
